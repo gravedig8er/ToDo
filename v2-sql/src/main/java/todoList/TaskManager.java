@@ -11,7 +11,7 @@ public class TaskManager {
 
     public TaskManager() {
         this.ts = new TaskStorage();
-        this.list = ts.read();
+//        this.list = ts.read();
     }
     public void showAllTasks() {
         if (list.isEmpty()) {
@@ -25,14 +25,14 @@ public class TaskManager {
                 .forEach(i -> System.out.println("\t" + (i+1) + ". " + list.get(i)));
     }
 
-    public void addTask() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Опишите задачу: ");
-        String taskDescription = scanner.nextLine();
-
-        Task task = new Task(list.size(), taskDescription, EStatus.values()[0]);
-        list.add(task);
-    }
+//    public void addTask() {
+//        Scanner scanner = new Scanner(System.in);
+//        System.out.println("Опишите задачу: ");
+//        String taskDescription = scanner.nextLine();
+//
+//        Task task = new Task(list.size(), taskDescription, EStatus.values()[0]);
+//        list.add(task);
+//    }
 
     public void deleteTask() {
         showAllTasks();
@@ -124,7 +124,7 @@ public class TaskManager {
 
         }
         if (userMeaning == 1) {
-            ts.write(list);
+//            ts.write(list);
         }
     }
 }

@@ -1,4 +1,10 @@
 package todoList;
+// CRUD для БД
+/*
+* Create - создать
+* Read - получить все задачи
+* Update - изменить статус
+* Delete - удалить задачу*/
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -6,48 +12,78 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class TaskStorage {
-    private String path = "D:\\university\\oop\\source\\tasks.json";
+    private static final String DB_URL = "jdbc:sqlite:tasks.db";
 
-    public ArrayList<Task> read() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(path));) {
-
-            StringBuilder json = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                json.append(line);
-            }
-            Type type = new TypeToken<ArrayList<Task>>(){}.getType();
-            final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                    .setPrettyPrinting()
-                    .create();
-            ArrayList<Task> list = gson.fromJson(json.toString(), type);
-
-            if (list == null) return new ArrayList<Task>();
-            return list;
-        }
-        catch (IOException e) {
-            System.out.println("Проблема с открытием файла: " + e.getMessage());
-            return new ArrayList<>();
+    public TaskStorage() {
+        try (Connection conn = DriverManager.getConnection(DB_URL); Statement stmt = conn.createStatement()) {
+            String sql = """
+                    CREATE TABLE IF NOT EXISTS tasks (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        description TEXT NOT NULL,
+                        status TEXT NOT NULL,
+                        time text NOT NULL
+                    );
+                    """;
+            stmt.execute(sql); // выполнить
+        } catch (SQLException e) {
+            System.out.println("Ошибка при создании таблицы: " + e.getMessage());
         }
     }
 
-    public void write(ArrayList<Task> list) {
-        final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .setPrettyPrinting()
-                .create();
-        String json = gson.toJson(list);
+    public ArrayList<Task> readAll() {
+        ArrayList<Task> list = new ArrayList<>();
 
-        try (PrintWriter printWriter = new PrintWriter(new FileWriter(path));) {
-            printWriter.print(json);
+        String sql = "SELECT id, description, status, time FROM tasks ORDER BY id;";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String description = rs.getString("description");
+                EStatus status = EStatus.valueOf(rs.getString("status"));
+                LocalDateTime time = LocalDateTime.parse(rs.getString("time"));
+
+                list.add(new Task(id, description, status, time));
+            }
+        } catch(SQLException e) {
+            System.out.println("Ошибка при чтении из БД: " + e.getMessage());
         }
-        catch (IOException e) {
-            System.out.println("Ошибка записи в файл: " + e.getMessage());
+        return list;
+    }
+
+    public void insert(Task task) {
+        String sql = "INSERT INTO tasks(description, status, time) VALUES(?, ?, ?);";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, task.getDescription());
+            pstmt.setString(2, task.getStatus().name());
+            pstmt.setString(3, task.getTime().toString());
+            pstmt.executeUpdate();
+
+        } catch(SQLException e) {
+            System.out.println("Ошибка при добавлении задачи: " + e.getMessage());
+        }
+    }
+
+    public void delete(int id) {
+        String sql = "DELETE FROM tasks WHERE ID = ?;";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при удалении: " + e.getMessage());
         }
     }
 
