@@ -87,4 +87,17 @@ public class TaskStorage {
         }
     }
 
+    public void updateStatus(int id, EStatus status) {
+        String sql = "UPDATE tasks SET status = ? WHERE id = ?;";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, status.name());
+            pstmt.setInt(2, id);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Ошибка при обновлении статуса: " + e.getMessage());
+        }
+    }
 }
