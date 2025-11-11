@@ -28,7 +28,7 @@ public class Main {
             }
             switch (userIN) {
                 case 0:
-                    tm.quit();
+                    System.out.println("Завершение работы");
                     quitFlag = true;
                     break;
                 case 1:

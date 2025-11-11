@@ -2,6 +2,7 @@ package todoList;
 // ОПИСАНИЕ ОДНОЙ ЗАДАЧИ
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Task {
     private int id;
@@ -60,6 +61,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return  description + "\tStatus: " + status + "\tDate: " + time.toString();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+        return  description + "\tStatus: " + status + "\tDate: " + time.format(formatter);
     }
 }

@@ -6,16 +6,11 @@ package todoList;
 * Update - изменить статус
 * Delete - удалить задачу*/
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
 import java.io.*;
-import java.lang.reflect.Type;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
+
 
 public class TaskStorage {
     private static final String DB_URL = "jdbc:sqlite:tasks.db";
